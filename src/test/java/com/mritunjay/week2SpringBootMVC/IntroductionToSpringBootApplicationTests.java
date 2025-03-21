@@ -1,4 +1,4 @@
-package com.mritunjay.week1Introduction.IntroductionToSpringBoot;
+package com.mritunjay.week2SpringBootMVC;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
