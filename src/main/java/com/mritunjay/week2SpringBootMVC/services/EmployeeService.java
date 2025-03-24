@@ -2,6 +2,7 @@ package com.mritunjay.week2SpringBootMVC.services;
 
 import com.mritunjay.week2SpringBootMVC.dto.EmployeeDTO;
 import com.mritunjay.week2SpringBootMVC.entities.EmployeeEntity;
+import com.mritunjay.week2SpringBootMVC.exceptions.ResourceNotFoundException;
 import com.mritunjay.week2SpringBootMVC.repositories.EmployeeRepository;
 import jakarta.persistence.EntityNotFoundException;
 
@@ -15,6 +16,7 @@ import java.sql.Ref;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
@@ -27,10 +29,11 @@ public class EmployeeService {
         this.modelMapper = modelMapper;
     }
 
-    public EmployeeDTO getEmployeeById(Long id){
-        EmployeeEntity employee = employeeRepository.findById(id).orElse(null);
-
-        return modelMapper.map(employee,EmployeeDTO.class);
+    public Optional<EmployeeDTO> getEmployeeById(Long id){
+//        Optional<EmployeeDTO> employee = employeeRepository.findById(id).orElse(null);
+//
+//        return employee.map(employeeEntity -> modelMapper.map(employeeEntity,EmployeeDTO.class);
+        return employeeRepository.findById(id).map(employeeEntity -> modelMapper.map(employeeEntity,EmployeeDTO.class));
     }
 
     public List<EmployeeDTO> getAllEmployees(){
@@ -46,7 +49,8 @@ public class EmployeeService {
     }
 
     public EmployeeDTO updateEmployeeById(Long employeeId, EmployeeDTO employeeDTO) {
-        EmployeeEntity existingEmployee = employeeRepository.findById(employeeId).orElseThrow(()->new EntityNotFoundException("Employee Not found with Id: "+ employeeId));
+        isExistsByEmployeeId(employeeId);
+        EmployeeEntity existingEmployee = employeeRepository.findById(employeeId).orElse(null);
         modelMapper.map(employeeDTO,existingEmployee);
         existingEmployee.setId(employeeId);
         EmployeeEntity savedEmployeeEntity = employeeRepository.save(existingEmployee);
@@ -54,20 +58,20 @@ public class EmployeeService {
     }
 
     public boolean isExistsByEmployeeId(Long employeeId){
-        return employeeRepository.existsById(employeeId);
+        boolean exists = employeeRepository.existsById(employeeId);
+        if(!exists) throw new ResourceNotFoundException("Employee not found with id: "+employeeId);
+        return true;
     }
 
-    public String deleteEmployeeById(Long employeeId){
-        boolean exists = isExistsByEmployeeId(employeeId);
-        if(!exists) return "Employee Does Not Exists";
+    public Boolean deleteEmployeeById(Long employeeId){
+        isExistsByEmployeeId(employeeId);
         employeeRepository.deleteById(employeeId);
-        return "Employee deleted SuccessFully";
+        return true;
     }
 
     public EmployeeDTO partiallyUpdateEmployeeById(Long employeeId, Map<String, Object> updatedEmployee) {
         // Step 1: Check if the employee exists in the database.
-        boolean exists = isExistsByEmployeeId(employeeId);
-        if (!exists) return null;
+        isExistsByEmployeeId(employeeId);
 
         // Step 2: Retrieve the EmployeeEntity object from the database.
         EmployeeEntity employeeEntity = employeeRepository.findById(employeeId).orElse(null);
