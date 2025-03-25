@@ -1,6 +1,7 @@
 package com.mritunjay.week2SpringBootMVC.dto;
 
 import com.mritunjay.week2SpringBootMVC.annotations.EmployeeRoleValidation;
+import com.mritunjay.week2SpringBootMVC.annotations.PasswordValidation;
 import jakarta.validation.constraints.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -37,6 +38,8 @@ public class EmployeeDTO {
     private Double salary;
     @PastOrPresent(message = "DateOfJoining field in Employee cannot be in future")
     private LocalDate dateOfJoining;
+    @PasswordValidation
+    private String password;
 
     @AssertTrue(message = "Employee should be active")
     private Boolean isActive;
